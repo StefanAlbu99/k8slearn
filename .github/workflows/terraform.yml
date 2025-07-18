@@ -51,13 +51,13 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   ARM_CLIENT_ID: ${{ vars.ARM_CLIENT_ID }}
   ARM_TENANT_ID: ${{ vars.ARM_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ vars.ARM_SUBSCRIPTION_ID }}
-
-
+  
 jobs:
   terraform:
     name: 'Terraform'
