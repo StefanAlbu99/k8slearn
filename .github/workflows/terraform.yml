@@ -88,12 +88,13 @@ jobs:
     - name: Terraform Format
       run: terraform fmt -check
 
-    - name: Azure Login
-      uses: azure/login@v1
+    - name: Azure Login with OIDC federated credential
+      uses: azure/login@v2
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        enable-oidc: true
 
 
     # Generates an execution plan for Terraform
