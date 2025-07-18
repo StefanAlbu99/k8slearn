@@ -1,16 +1,16 @@
 terraform {
-    cloud { 
-        organization = "k8slearning" 
-        workspaces { 
-            name = "k8slearning" 
-        }    
-    } 
-    required_providers {
-        azurerm = {
-            source  = "hashicorp/azurerm"
-            version = "~> 3.0"
-        }
+  cloud {
+    organization = "k8slearning"
+    workspaces {
+      name = "k8slearning"
     }
+  }
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
+    }
+  }
 }
 
 provider "azurerm" {
