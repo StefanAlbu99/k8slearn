@@ -11,11 +11,12 @@ terraform {
       version = "~> 4.0"
     }
   }
-  required_version = ">= 1.3"
+  required_version = ">= 1.12"
 }
 
 provider "azurerm" {
   features {}
+  use_oidc = true
 }
 
 resource "azurerm_resource_group" "rg" {
