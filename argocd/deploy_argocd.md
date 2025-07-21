@@ -58,6 +58,24 @@ In order to access the server UI you have the following options:
 
 After reaching the UI the first time you can login with username: admin and the random password generated during the installation. You can find the password by running:
 
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
 (You should delete the initial secret afterwards as suggested by the Getting Started Guide: https://argo-cd.readthedocs.io/en/stable/getting_started/#4-login-using-the-cli)
+
+## 6. Test Portforward locally to ArgoCD Server instance
+
+k get svc | grep argocd-server
+argocd-server                      ClusterIP   10.0.184.73    <none>        80/TCP,443/TCP      15m
+
+```bash
+k get svc -n argocd | grep argocd-server
+argocd-server                      ClusterIP   10.0.184.73    <none>        80/TCP,443/TCP      15m
+```
+
+- We can see that the service attached to argocd-server pod, is listening on ports 80 & 443. Lets portforward to one of them locally.
+
+- This command will connect our local port 8080 to Argocd Service on port 443. (We could also use port 80 on the service)
+
+```bash
+kubectl port-forward service/argocd-server -n argocd 8080:443
+```
