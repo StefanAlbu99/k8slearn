@@ -49,7 +49,9 @@ jobs:
           enable-AzPSSession: false  # optional, no PowerShell session needed
 
       - name: Initialize OpenTofu
+        working-directory: IAC/DEV
         run: tofu init -backend-config=backend.dev.tfvars
 
       - name: Plan OpenTofu
+        working-directory: IAC/DEV
         run: tofu plan
