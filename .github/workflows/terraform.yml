@@ -17,6 +17,21 @@ env:
   ARM_TENANT_ID: ${{ vars.ARM_TENANT_ID }}
 
 jobs:
+  # First job (opentofu-dev) ---------------------------------------------
+  # 1. Checkout repo -> pull the current repo
+  # 2. Install OpenTofu CLI
+  # 3. Login to Azure with OIDC
+  # 4. Initialize OpenTofu
+  # 5. Plan OpenTofu
+  # 6. Upload the plan as an artifact
+
+  # Second job (opentofu-apply) -------------------------------------------
+  # 1. Checkout repo -> pull the current repo
+  # 2. Install OpenTofu CLI
+  # 3. Login to Azure with OIDC
+  # 4. Download the plan artifact
+  # 5. Apply OpenTofu
+  # -------------------------------------------
   opentofu-dev:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
@@ -38,7 +53,6 @@ jobs:
           unzip -j tofu_1.10.6_linux_amd64.zip tofu  # -j extracts just the file without directories
           sudo mv tofu /usr/local/bin/
           tofu version
-
 
       - name: Login to Azure with OIDC
         uses: azure/login@v2
