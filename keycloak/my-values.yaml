@@ -1,0 +1,4 @@
+auth:
+  adminPassword: admin123
+  adminUser: admin
+proxy: "edge"
