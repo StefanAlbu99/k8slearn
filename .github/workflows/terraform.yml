@@ -54,10 +54,49 @@ jobs:
 
       - name: Plan OpenTofu
         working-directory: IAC/DEV
-        run: tofu plan
+        run: |
+          tofu plan -out=tfplan
+        # Save the plan as an artifact so apply job can use it
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: IAC/DEV/tfplan
   
   opentofu-apply:
+    name: Apply OpenTofu
     runs-on: ubuntu-latest
-    environment: dev    # requires approval
+    needs: opentofu-dev  # will only run if plan job succeeds
+    environment: dev  # manual approval
+    defaults:
+      run:
+        shell: bash
     steps:
-      - run: tofu apply  # will pause until approved
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Install OpenTofu CLI
+        run: |
+          curl -LO https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_amd64.zip
+          unzip -j tofu_1.10.6_linux_amd64.zip tofu
+          sudo mv tofu /usr/local/bin/
+          tofu version
+
+      - name: Login to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          enable-AzPSSession: false
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+          path: IAC/DEV
+
+      - name: Apply OpenTofu
+        working-directory: IAC/DEV
+        run: tofu apply -auto-approve tfplan
