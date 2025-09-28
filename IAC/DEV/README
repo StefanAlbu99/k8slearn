@@ -1,0 +1,19 @@
+### 🔑 Federated Credential Setup
+
+Here’s how the Service Principal federated credential is configured in Azure:
+
+![Federated Credential Screenshot](../../images/OPENTOFU_FEDERATED_CREDENTIAL.png "Federated Credential Example")
+
+---
+
+### ⚙️ Environment Variables for OIDC Authentication
+
+Set these in your GitHub Actions workflow or repository secrets:
+
+| Variable               | Description                          |
+|------------------------|--------------------------------------|
+| `ARM_CLIENT_ID`        | AppId of the Service Principal       |
+| `ARM_SUBSCRIPTION_ID`  | Azure Subscription ID                |
+| `ARM_TENANT_ID`        | Azure Tenant ID                      |
+
+> 💡 Tip: Run `terraform init -backend-config=backend.dev.tfvars` to initialize the remote backend with your OIDC-enabled SP.

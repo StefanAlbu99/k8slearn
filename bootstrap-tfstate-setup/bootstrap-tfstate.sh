@@ -8,11 +8,12 @@
 
 
 # ========= CONFIG =========
-RESOURCE_GROUP_NAME="rg-tfstate"
-STORAGE_ACCOUNT_NAME="tfstate$RANDOM"
-CONTAINER_NAME="tfstate"
+ENVIRONMENT="dev"  # Change to "dev" or "prod"
+RESOURCE_GROUP_NAME="rg-tfstate-management"  # single shared resource group
+STORAGE_ACCOUNT_NAME="tfstate${ENVIRONMENT}$(date +%s | tail -c 5)"  # unique per env
+CONTAINER_NAME="${ENVIRONMENT}-tfstate"  # container per env
 LOCATION="westeurope"
-SP_NAME="opentofu-sp-dev-contributor"
+SP_NAME="opentofu-sp-${ENVIRONMENT}-contributor"
 # ==========================
 
 echo "Getting current subscription..."
@@ -65,4 +66,4 @@ echo "Terraform backend config:"
 echo "resource_group_name  = \"$RESOURCE_GROUP_NAME\""
 echo "storage_account_name = \"$STORAGE_ACCOUNT_NAME\""
 echo "container_name       = \"$CONTAINER_NAME\""
-echo "key                  = \"dev.terraform.tfstate\""
+echo "key                  = \"${ENVIRONMENT}.terraform.tfstate\""
