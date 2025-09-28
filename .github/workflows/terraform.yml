@@ -19,6 +19,8 @@ env:
 jobs:
   opentofu-dev:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/opentofu/opentofu:1.10.6
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     env:
       ARM_CLIENT_ID: ${{ vars.ARM_CLIENT_ID }}
@@ -31,12 +33,6 @@ jobs:
     steps:
       - name: Checkout Repo # pulls the repo code
         uses: actions/checkout@v4
-
-      - name: Set up OpenTofu # installs OpenTofu CLI
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
-          terraform_version: 1.6.0  # matches Tofu 1.10.6
 
       - name: Login to Azure with OIDC
         uses: azure/login@v2
