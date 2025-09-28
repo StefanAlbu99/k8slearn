@@ -3,8 +3,8 @@ name: 'Opentofu with OIDC'
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'IAC/DEV/**'    # Only trigger if files in DEV change
+    #paths:
+    #  - 'IAC/DEV/**'    # Only trigger if files in DEV change
   workflow_dispatch:
 
 permissions:
@@ -19,8 +19,6 @@ env:
 jobs:
   opentofu-dev:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/opentofu/opentofu:1.10.6
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     env:
       ARM_CLIENT_ID: ${{ vars.ARM_CLIENT_ID }}
@@ -33,6 +31,13 @@ jobs:
     steps:
       - name: Checkout Repo # pulls the repo code
         uses: actions/checkout@v4
+      
+      - name: Install OpenTofu CLI
+        run: |
+          curl -LO https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_amd64.zip
+          unzip tofu_1.10.6_linux_amd64.zip
+          sudo mv tofu /usr/local/bin/
+          tofu version
 
       - name: Login to Azure with OIDC
         uses: azure/login@v2
