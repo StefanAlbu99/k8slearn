@@ -59,7 +59,7 @@ jobs:
         # Save the plan as an artifact so apply job can use it
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: IAC/DEV/tfplan
@@ -92,7 +92,7 @@ jobs:
           enable-AzPSSession: false
 
       - name: Download Plan Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
           path: IAC/DEV
