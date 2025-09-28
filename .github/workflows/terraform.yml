@@ -35,9 +35,10 @@ jobs:
       - name: Install OpenTofu CLI
         run: |
           curl -LO https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_amd64.zip
-          unzip tofu_1.10.6_linux_amd64.zip
+          unzip -j tofu_1.10.6_linux_amd64.zip tofu  # -j extracts just the file without directories
           sudo mv tofu /usr/local/bin/
           tofu version
+
 
       - name: Login to Azure with OIDC
         uses: azure/login@v2
