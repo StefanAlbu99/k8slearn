@@ -55,3 +55,9 @@ jobs:
       - name: Plan OpenTofu
         working-directory: IAC/DEV
         run: tofu plan
+  
+  opentofu-apply:
+    runs-on: ubuntu-latest
+    environment: dev    # requires approval
+    steps:
+      - run: tofu apply  # will pause until approved
