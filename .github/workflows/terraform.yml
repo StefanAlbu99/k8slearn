@@ -15,22 +15,25 @@ env:
   ARM_CLIENT_ID: ${{ vars.ARM_CLIENT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ vars.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ vars.ARM_TENANT_ID }}
+  OPENTOFU_VERSION: 1.10.6
 
 jobs:
   # First job (opentofu-dev) ---------------------------------------------
   # 1. Checkout repo -> pull the current repo
-  # 2. Install OpenTofu CLI
-  # 3. Login to Azure with OIDC
-  # 4. Initialize OpenTofu
-  # 5. Plan OpenTofu
-  # 6. Upload the plan as an artifact
+  # 2. Cache OpenTofu providers
+  # 3. Install OpenTofu CLI (coming from composite action opentofu-setup)
+  # 4. Login to Azure with OIDC (coming from composite action opentofu-setup)
+  # 5. Initialize OpenTofu
+  # 6. Plan OpenTofu
+  # 7. Upload the plan as an artifact
 
   # Second job (opentofu-apply) -------------------------------------------
   # 1. Checkout repo -> pull the current repo
-  # 2. Install OpenTofu CLI
-  # 3. Login to Azure with OIDC
-  # 4. Download the plan artifact
-  # 5. Apply OpenTofu
+  # 2. Cache OpenTofu providers
+  # 3. Install OpenTofu CLI (coming from composite action opentofu-setup)
+  # 4. Login to Azure with OIDC (coming from composite action opentofu-setup)
+  # 5. Download the plan artifact
+  # 6. Apply OpenTofu
   # -------------------------------------------
   opentofu-dev-setup:
     runs-on: ubuntu-latest
@@ -47,20 +50,21 @@ jobs:
       - name: Checkout Repo # pulls the repo code
         uses: actions/checkout@v4
       
-      - name: Install OpenTofu CLI
-        run: |
-          curl -LO https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_amd64.zip
-          unzip -j tofu_1.10.6_linux_amd64.zip tofu  # -j extracts just the file without directories
-          sudo mv tofu /usr/local/bin/
-          tofu version
-
-      - name: Login to Azure with OIDC
-        uses: azure/login@v2
+      - name: Setup OpenTofu + Azure
+        uses: ./.github/actions/opentofu-setup
         with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
-          enable-AzPSSession: false  # optional, no PowerShell session needed
+          opentofu_version: ${{ env.OPENTOFU_VERSION }}
+          azure_client_id: ${{ env.ARM_CLIENT_ID }}
+          azure_tenant_id: ${{ env.ARM_TENANT_ID }}
+          azure_subscription_id: ${{ env.ARM_SUBSCRIPTION_ID }}
+      
+      # Cache OpenTofu/Terraform providers
+      - name: Cache OpenTofu providers
+        uses: actions/cache@v4
+        with:
+          path: ~/.terraform.d/plugin-cache
+          # Hash the lock file inside IAC/DEV so cache updates if providers change
+          key: ${{ runner.os }}-opentofu-${{ hashFiles('IAC/DEV/.terraform.lock.hcl') }}
 
       - name: Initialize OpenTofu
         working-directory: IAC/DEV
@@ -69,14 +73,17 @@ jobs:
       - name: Plan OpenTofu
         working-directory: IAC/DEV
         run: |
-          tofu plan -out=tfplan
+          tofu plan -out=tfplan -input=false
         # Save the plan as an artifact so apply job can use it
 
-      - name: Upload Plan Artifact
+      # Upload providers, lock file, and plan as artifacts
+      - name: Upload OpenTofu artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan
-          path: IAC/DEV/tfplan
+          name: tofu-artifacts
+          path: |
+            IAC/DEV/.terraform.lock.hcl
+            IAC/DEV/tfplan
   
   opentofu-dev-apply:
     name: Apply OpenTofu
@@ -90,20 +97,13 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Install OpenTofu CLI
-        run: |
-          curl -LO https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_amd64.zip
-          unzip -j tofu_1.10.6_linux_amd64.zip tofu
-          sudo mv tofu /usr/local/bin/
-          tofu version
-
-      - name: Login to Azure with OIDC
-        uses: azure/login@v2
+      - name: Setup OpenTofu + Azure
+        uses: ./.github/actions/opentofu-setup
         with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
-          enable-AzPSSession: false
+          opentofu_version: ${{ env.OPENTOFU_VERSION }}
+          azure_client_id: ${{ env.ARM_CLIENT_ID }}
+          azure_tenant_id: ${{ env.ARM_TENANT_ID }}
+          azure_subscription_id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
       - name: Download Plan Artifact
         uses: actions/download-artifact@v4

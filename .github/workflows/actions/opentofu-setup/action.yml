@@ -1,0 +1,34 @@
+name: "OpenTofu Setup + Azure Login"
+description: "Installs OpenTofu CLI and logs into Azure with OIDC"
+inputs:
+  opentofu_version:
+    description: "Version of OpenTofu CLI"
+    required: true
+  azure_client_id:
+    description: "Azure Client ID"
+    required: true
+  azure_tenant_id:
+    description: "Azure Tenant ID"
+    required: true
+  azure_subscription_id:
+    description: "Azure Subscription ID"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install OpenTofu CLI
+      shell: bash
+      run: |
+        curl -LO https://github.com/opentofu/opentofu/releases/download/v${{ inputs.opentofu_version }}/tofu_${{ inputs.opentofu_version }}_linux_amd64.zip
+        # Optional: verify SHA256
+        unzip -j tofu_${{ inputs.opentofu_version }}_linux_amd64.zip tofu
+        sudo mv tofu /usr/local/bin/
+        tofu version
+
+    - name: Azure Login via OIDC
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure_client_id }}
+        tenant-id: ${{ inputs.azure_tenant_id }}
+        subscription-id: ${{ inputs.azure_subscription_id }}
+        enable-AzPSSession: false
