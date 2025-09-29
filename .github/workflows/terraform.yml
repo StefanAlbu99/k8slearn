@@ -105,6 +105,18 @@ jobs:
           azure_tenant_id: ${{ env.ARM_TENANT_ID }}
           azure_subscription_id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
+      # Restore provider cache
+      - name: Restore OpenTofu provider cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-opentofu-${{ hashFiles('IAC/DEV/.terraform.lock.hcl') }}
+
+      # Initialize OpenTofu in the apply job
+      - name: Initialize OpenTofu (Apply Job)
+        working-directory: IAC/DEV
+        run: tofu init -backend-config=backend.dev.tfvars
+
       - name: Download Plan Artifact
         uses: actions/download-artifact@v4
         with:
