@@ -62,6 +62,14 @@ jobs:
         working-directory: IAC/DEV
         run: tofu init -backend-config=backend.dev.tfvars
 
+      - name: Format OpenTofu code
+        working-directory: IAC/DEV
+        run: tofu fmt -recursive
+
+      - name: Validate OpenTofu code
+        working-directory: IAC/DEV
+        run: tofu validate
+
       - name: Plan OpenTofu
         working-directory: IAC/DEV
         run: |

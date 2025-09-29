@@ -9,9 +9,9 @@ terraform {
     # subscription_id      = "00000000-0000-0000-0000-000000000000"
     # tenant_id            = "00000000-0000-0000-0000-000000000000"
 
-    
+
     #instead lets using the terraform init -backend-config=backend.dev.tfvars
-    }
+  }
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -24,19 +24,18 @@ provider "azurerm" {
   features {}
 }
 
-# Generate a random suffix
-resource "random_string" "suffix" {
-  length  = 6
-  upper   = false
-  special = false
+module "aks" {
+  source = "../modules/aks"
+
+  org            = "stef"
+  env            = "dev"
+  location_short = "weu"
+  location       = "West Europe"
+  node_count     = 2
+  vm_size        = "Standard_DS3_v2"
+  tags = {
+    environment = "dev"
+    project     = "k8s-demo"
+  }
 }
 
-# Create the resource group
-resource "azurerm_resource_group" "rg" {
-  name     = "test-rg-${random_string.suffix.result}"
-  location = "westeurope"
-}
-
-output "resource_group_name" {
-  value = azurerm_resource_group.rg.name
-}
