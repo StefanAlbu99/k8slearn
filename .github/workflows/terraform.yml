@@ -108,7 +108,7 @@ jobs:
       - name: Download Plan Artifact
         uses: actions/download-artifact@v4
         with:
-          name: tfplan
+          name: tofu-artifacts
           path: IAC/DEV
 
       - name: Apply OpenTofu
